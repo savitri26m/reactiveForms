@@ -21,7 +21,9 @@ export class CustomerComponent implements OnInit {
     this.customerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(5)]],
       lastName: [{value: 'Mortey', disabled: false}, [Validators.required, Validators.maxLength(50)]],
-      email: [{value: 'jane@gmail.com', disabled: false}, [Validators.email, Validators.required]],
+      email: ['', [Validators.email, Validators.required]],
+      phone: '',
+      notification: 'email',
       sendCatalog: true
     })
   }
@@ -29,6 +31,16 @@ export class CustomerComponent implements OnInit {
   save() {
     console.log(this.customerForm);
     console.log('Saved: ' + JSON.stringify(this.customerForm.value));
+  }
+
+  setNotification(notify: string){
+    const phoneControl = this.customerForm.get('phone');
+    if(notify === 'text'){
+      phoneControl.setValidators(Validators.required);
+    }else{
+      phoneControl.clearValidators();
+    }
+    phoneControl.updateValueAndValidity(); //reevaulating phone formControl validation state
   }
 
   // patchValue allows to set only desired propertyvalue as required
