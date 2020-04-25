@@ -29,12 +29,22 @@ export class CustomerComponent implements OnInit {
     console.log('Saved: ' + JSON.stringify(this.customerForm.value));
   }
 
-  populateTestData(): void{
-    this.customerForm.setValue({
+  // setValue allows us to set the all property values to the form element
+  // populateTestData(): void{
+  //   this.customerForm.setValue({
+  //     firstName: 'Jack',
+  //     lastName: 'Harkness',
+  //     email: 'jack@gmail.com',
+  //     sendCatalog: false
+  //   })
+  // }
+
+  // patchValue allows to set only desired propertyvalue as required
+  populateTestData(){
+    this.customerForm.patchValue({
       firstName: 'Jack',
-      lastName: 'Harkness',
-      email: 'jack@gmail.com',
-      sendCatalog: false
+      lastName: 'Doe'
     })
   }
+
 }
