@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { Customer } from './customer';
 
@@ -15,11 +15,13 @@ export class CustomerComponent implements OnInit {
 
   constructor(private fb: FormBuilder) { }
 
+// Array syntax is used to add Validators to formControl elements
+
   ngOnInit() {
     this.customerForm = this.fb.group({
-      firstName: '',
-      lastName: {value: 'Mortey', disabled: false},
-      email: [{value: 'jane@gmail.com', disabled: true}],
+      firstName: ['', [Validators.required, Validators.minLength(5)]],
+      lastName: [{value: 'Mortey', disabled: false}, [Validators.required, Validators.maxLength(50)]],
+      email: [{value: 'jane@gmail.com', disabled: false}, [Validators.email, Validators.required]],
       sendCatalog: true
     })
   }
