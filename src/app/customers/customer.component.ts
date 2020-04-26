@@ -16,7 +16,7 @@ import { Customer } from './customer';
 function ratingRange(min: number, max: number) : ValidatorFn {
   return (c: AbstractControl): {[key: string]: boolean} | null => {
     if(c.value !== null && (isNaN(c.value) || c.value < min || c.value > max )){
-      return { 'range': true }
+      return { 'range': true } //key is the name of broken validation rule
     }
     return null;
   }
@@ -32,7 +32,7 @@ function emailMatcher(c:AbstractControl): { [key: string]: boolean} | null {
   }
 
   if(emailControl.value !== confirmEmailControl.value) {
-    return { 'match': true }
+    return { 'match': true } //key is the name of broken validation rule
   }
   return null
 }
@@ -61,12 +61,17 @@ export class CustomerComponent implements OnInit {
       emailGroup: this.fb.group({
         email: ['', [Validators.email, Validators.required]],
         confirmEmail: ['', Validators.required],
-      }, { validators: emailMatcher }),
+      }, { validators: emailMatcher }),  // while providing validator for formGroup we provide it as an object as key value pair
       phone: '',
       rating: [null, ratingRange(1,5)],
       notification: 'email',
       sendCatalog: true
     })
+
+    //using watcher instead of click events to bind the values selected by user
+    this.customerForm.get('notification').valueChanges.subscribe(
+      (value) => this.setNotification(value)
+    )
   }
 
   save() {
