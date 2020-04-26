@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn, FormArray } from '@angular/forms';
 import {debounceTime } from 'rxjs/operators';
  
 import { Customer } from './customer';
@@ -51,6 +51,10 @@ export class CustomerComponent implements OnInit {
   // manages instance of customer data that we are binding to in our template
   customer = new Customer();
 
+  get addresses(): FormArray {
+    return <FormArray>this.customerForm.get('addresses')
+  }
+
 
 // ----------------------- Removing Validations from HTML for email only ------------------------
   emailMessages: string; // property to display error messages
@@ -75,7 +79,8 @@ export class CustomerComponent implements OnInit {
       rating: [null, ratingRange(1,5)],
       notification: 'email',
       sendCatalog: false,
-      addresses: this.buildAddress() //creating instance of address formGroup
+      addresses: this.fb.array([ this.buildAddress() ])
+      // addresses: this.buildAddress() //creating instance of address formGroup
     })
 
     //using watcher instead of click events to bind the values selected by user
@@ -136,6 +141,12 @@ export class CustomerComponent implements OnInit {
       lastName: 'Doe'
     })
   }
+
+
+  // adding a new address instance
+  addAddresses(): void {
+    this.addresses.push(this.buildAddress())
+  } 
 
 }
 
