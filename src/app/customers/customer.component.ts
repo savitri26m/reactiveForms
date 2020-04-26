@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
-
+import {debounceTime } from 'rxjs/operators';
+ 
 import { Customer } from './customer';
 
 
+// ------------------------- Custom Range Validation -----------------------------------
 // function without using parameters
 // function ratingRange(c: AbstractControl) : {[key:string]: boolean } |null {
 //   if(c.value !== null && (isNaN(c.value) || c.value < 1 || c.value > 5)){
@@ -21,7 +23,7 @@ function ratingRange(min: number, max: number) : ValidatorFn {
     return null;
   }
 }
-
+// --------------------------- Cross field email validation --------------------------------
 function emailMatcher(c:AbstractControl): { [key: string]: boolean} | null {
   const emailControl = c.get('email');
   const confirmEmailControl = c.get('confirmEmail');
@@ -37,6 +39,7 @@ function emailMatcher(c:AbstractControl): { [key: string]: boolean} | null {
   return null
 }
 
+
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
@@ -48,7 +51,13 @@ export class CustomerComponent implements OnInit {
   // manages instance of customer data that we are binding to in our template
   customer = new Customer();
 
-  // creating custom validator
+
+// ----------------------- Removing Validations from HTML for email only ------------------------
+  emailMessages: string; // property to display error messages
+  private validationMessages = {
+    required: 'Please enter your email address',
+    email: 'Please enter a valid email address '
+  }
 
   constructor(private fb: FormBuilder) { }
 
@@ -65,13 +74,43 @@ export class CustomerComponent implements OnInit {
       phone: '',
       rating: [null, ratingRange(1,5)],
       notification: 'email',
-      sendCatalog: true
+      sendCatalog: false,
+      addresses: this.buildAddress() //creating instance of address formGroup
     })
 
     //using watcher instead of click events to bind the values selected by user
     this.customerForm.get('notification').valueChanges.subscribe(
       (value) => this.setNotification(value)
     )
+
+    // email watcher code
+      const emailControlVar = this.customerForm.get('emailGroup.email');
+      emailControlVar.valueChanges.pipe(
+        debounceTime(1000)
+      ).subscribe(
+        value => this.setMessages(emailControlVar)
+      )
+
+  }
+
+  // refactoring address formFroup
+  buildAddress(): FormGroup{
+    return this.fb.group({
+      addressType: 'home',
+      street1: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    })
+  }
+
+  setMessages(c: AbstractControl): void {
+    this.emailMessages = '';
+    if ((c.touched || c.dirty) && c.errors) {
+      this.emailMessages = Object.keys(c.errors).map(
+        key => this.validationMessages[key]).join(' ');
+    }
   }
 
   save() {
