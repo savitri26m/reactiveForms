@@ -12,7 +12,6 @@ import { Customer } from './customer';
 //   return null;
 // }
 
-
 // modified function by passing parameters, by wrapping it in factory function, which can take more than one parameter
 function ratingRange(min: number, max: number) : ValidatorFn {
   return (c: AbstractControl): {[key: string]: boolean} | null => {
@@ -21,6 +20,21 @@ function ratingRange(min: number, max: number) : ValidatorFn {
     }
     return null;
   }
+}
+
+function emailMatcher(c:AbstractControl): { [key: string]: boolean} | null {
+  const emailControl = c.get('email');
+  const confirmEmailControl = c.get('confirmEmail');
+
+  // if both the form controls are not yet been touched, we do not want to show error messages
+  if(emailControl.pristine || confirmEmailControl.pristine) {
+    return null
+  }
+
+  if(emailControl.value !== confirmEmailControl.value) {
+    return { 'match': true }
+  }
+  return null
 }
 
 @Component({
@@ -44,7 +58,10 @@ export class CustomerComponent implements OnInit {
     this.customerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(5)]],
       lastName: [{value: 'Mortey', disabled: false}, [Validators.required, Validators.maxLength(50)]],
-      email: ['', [Validators.email, Validators.required]],
+      emailGroup: this.fb.group({
+        email: ['', [Validators.email, Validators.required]],
+        confirmEmail: ['', Validators.required],
+      }, { validators: emailMatcher }),
       phone: '',
       rating: [null, ratingRange(1,5)],
       notification: 'email',
